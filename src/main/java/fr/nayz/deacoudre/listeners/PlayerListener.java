@@ -1,7 +1,12 @@
 package fr.nayz.deacoudre.listeners;
 
 import fr.nayz.deacoudre.managers.GameManager;
+import fr.nayz.deacoudre.messages.Message;
 import fr.nayz.deacoudre.players.GamePlayer;
+import fr.nayz.deacoudre.scoreboards.EndBoard;
+import fr.nayz.deacoudre.scoreboards.LobbyBoard;
+import fr.nayz.deacoudre.scoreboards.PlayingBoard;
+import fr.nayz.deacoudre.scoreboards.StartingBoard;
 import fr.nayz.deacoudre.status.GameStatus;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -33,7 +38,23 @@ public class PlayerListener implements Listener {
             gameManager.setStatus(GameStatus.STARTING);
         }
 
-        event.joinMessage(Component.text(player.getName() + " a rejoint la partie"));
+        // Scoreboard
+        switch (gameManager.getStatus()) {
+            case LOBBY:
+                LobbyBoard.getInstance().createNewScoreboard(player);
+                break;
+            case STARTING:
+                StartingBoard.getInstance().createNewScoreboard(player);
+                break;
+            case PLAYING:
+                PlayingBoard.getInstance().createNewScoreboard(player);
+                break;
+            case END:
+                EndBoard.getInstance().createNewScoreboard(player);
+                break;
+        }
+
+        event.joinMessage(Component.text(Message.JOIN.getMessage(player)));
     }
 
     @EventHandler
@@ -47,7 +68,7 @@ public class PlayerListener implements Listener {
             gameManager.checkWin();
         }
 
-        event.quitMessage(Component.text(player.getName() + " a quitté la partie"));
+        event.quitMessage(Component.text(Message.QUIT.getMessage(player)));
     }
 
     @EventHandler

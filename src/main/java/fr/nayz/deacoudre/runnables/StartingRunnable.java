@@ -1,6 +1,7 @@
 package fr.nayz.deacoudre.runnables;
 
 import fr.nayz.deacoudre.managers.GameManager;
+import fr.nayz.deacoudre.messages.Message;
 import fr.nayz.deacoudre.status.GameStatus;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -34,13 +35,15 @@ public class StartingRunnable extends BukkitRunnable {
 
         // Annoncer
         if (timer == 1 || timer == 2 || timer == 3 || timer % 5 == 0) {
-            Bukkit.broadcast(Component.text("Démarrage dans " + timer + " secondes"));
+            Bukkit.broadcast(Component.text(Message.STARTING_STATUS.getMessage(timer)));
         }
 
         if (timer == 0) {
             gameManager.setStatus(GameStatus.PLAYING);
             return;
         }
+
+        gameManager.setTimer(timer);
 
         timer--;
     }

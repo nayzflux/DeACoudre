@@ -4,6 +4,9 @@ import fr.nayz.deacoudre.listeners.CancelListener;
 import fr.nayz.deacoudre.listeners.PlayerListener;
 import fr.nayz.deacoudre.managers.ConfigManager;
 import fr.nayz.deacoudre.managers.GameManager;
+import fr.nayz.deacoudre.scoreboards.LobbyBoard;
+import fr.nayz.deacoudre.scoreboards.PlayingBoard;
+import fr.nayz.deacoudre.scoreboards.StartingBoard;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,6 +17,7 @@ public class DeACoudre extends JavaPlugin {
 
     public static DeACoudre getInstance() {
         return INSTANCE;
+
     }
 
     @Override
@@ -25,6 +29,10 @@ public class DeACoudre extends JavaPlugin {
 
         registerEvents();
         registerCommands();
+
+        new LobbyBoard().runTaskTimer(this, 0L, 20L);
+        new StartingBoard().runTaskTimer(this, 0L, 20L);
+        new PlayingBoard().runTaskTimer(this, 0L, 20L);
     }
 
     private void registerEvents() {
@@ -35,5 +43,9 @@ public class DeACoudre extends JavaPlugin {
 
     private void registerCommands() {
 
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 }

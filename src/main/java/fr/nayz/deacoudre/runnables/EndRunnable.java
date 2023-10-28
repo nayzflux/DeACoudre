@@ -31,6 +31,8 @@ public class EndRunnable extends BukkitRunnable {
             return;
         }
 
+        gameManager.setTimer(timer);
+
         timer--;
     }
 }

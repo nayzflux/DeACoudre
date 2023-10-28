@@ -31,6 +31,8 @@ public class LobbyRunnable extends BukkitRunnable {
             player.setLevel(timer);
         }
 
+        gameManager.setTimer(timer);
+
         timer++;
     }
 }

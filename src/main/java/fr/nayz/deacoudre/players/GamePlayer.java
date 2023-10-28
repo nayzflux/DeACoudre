@@ -1,6 +1,8 @@
 package fr.nayz.deacoudre.players;
 
+import fr.nayz.deacoudre.messages.Message;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -35,7 +37,7 @@ public class GamePlayer {
 
     public void addPoints(int amount) {
         points += amount;
-        player.sendMessage(Component.text("Vous remporté §e+" + amount + "pts"));
+        player.sendMessage(Component.text(Message.POINTS_ADD.getMessage(amount)));
     }
 
     public boolean isAlive() {
@@ -55,7 +57,9 @@ public class GamePlayer {
 
         isAlive = false;
 
-        player.sendMessage("Vous êtes mort");
+        Bukkit.broadcast(Component.text(Message.PLAYER_DIED.getMessage(player)));
+
+        player.showTitle(Title.title(Component.text("§cMort !"), Component.text("§7Vous avez toucher le sol")));
 
         Bukkit.getLogger().info("Dead: " + player.getName());
     }
@@ -96,8 +100,6 @@ public class GamePlayer {
         addPoints(amount);
 
         player.getLocation().getBlock().setType(Material.RED_WOOL);
-
-        player.sendMessage("Vous avez réussi à survivre");
     }
 
     public void setHasPlayed(boolean hasPlayed) {

@@ -6,7 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayingRunnable extends BukkitRunnable {
     private final GameManager gameManager;
-    private int timer = 10;
+    private int timer = 0;
 
     public PlayingRunnable(GameManager gameManager) {
         this.gameManager = gameManager;
@@ -18,6 +18,8 @@ public class PlayingRunnable extends BukkitRunnable {
             this.cancel();
             return;
         }
+
+        gameManager.setTimer(timer);
 
         timer++;
     }

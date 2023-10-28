@@ -1,11 +1,16 @@
 package fr.nayz.deacoudre.managers;
 
 import fr.nayz.deacoudre.maps.GameMap;
+import fr.nayz.deacoudre.messages.Message;
 import fr.nayz.deacoudre.players.GamePlayer;
 import fr.nayz.deacoudre.runnables.EndRunnable;
 import fr.nayz.deacoudre.runnables.LobbyRunnable;
 import fr.nayz.deacoudre.runnables.PlayingRunnable;
 import fr.nayz.deacoudre.runnables.StartingRunnable;
+import fr.nayz.deacoudre.scoreboards.EndBoard;
+import fr.nayz.deacoudre.scoreboards.LobbyBoard;
+import fr.nayz.deacoudre.scoreboards.PlayingBoard;
+import fr.nayz.deacoudre.scoreboards.StartingBoard;
 import fr.nayz.deacoudre.status.GameStatus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -30,6 +35,9 @@ public class GameManager {
     private Location waiting;
     private Location play;
     private GameStatus status;
+    private int round;
+    private Player winner;
+    private int timer;
 
     public GameManager(Plugin plugin) {
         this.plugin = plugin;
@@ -50,11 +58,19 @@ public class GameManager {
 
         this.players = new ArrayList<>();
 
+        this.timer = 0;
+
         setStatus(GameStatus.LOBBY);
     }
 
     public void startRound() {
         if (!isStatus(GameStatus.PLAYING)) return;
+
+        round++;
+
+        Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
+        Bukkit.broadcast(Component.text(Message.NEW_ROUND.getMessage()));
+        Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
 
         for (GamePlayer player : players) {
             player.setHasPlayed(false);
@@ -88,9 +104,13 @@ public class GameManager {
         }
 
         if (getAlivePlayers().size() == 1) {
-            setStatus(GameStatus.END);
             Player player = getAlivePlayers().get(0);
-            Bukkit.broadcast(Component.text(player.getName() + " a gagné la partie"));
+            winner = player;
+            setStatus(GameStatus.END);
+
+            Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
+            Bukkit.broadcast(Component.text(Message.WINNER_ANNOUNCE.getMessage(player)));
+            Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
         }
     }
 
@@ -103,8 +123,9 @@ public class GameManager {
 
         player.getInventory().setItem(0, bucket);
 
-        player.showTitle(Title.title(Component.text("§6A vous de jouer !"), Component.text("§6Eviter de toucher le sol")));
-        Bukkit.broadcast(Component.text("C'est au tour de " + player.getName() + " de tenter le grand saut !"));
+        player.showTitle(Title.title(Component.text("§6A vous de jouer !"), Component.text("§cEviter de toucher le sol")));
+
+        Bukkit.broadcast(Component.text(Message.PLAYER_PLAYTIME.getMessage(player)));
 
         gamePlayer.setCanPlay(true);
     }
@@ -119,6 +140,8 @@ public class GameManager {
         map.restore();
         players.clear();
         setStatus(GameStatus.LOBBY);
+
+        this.round = 0;
 
         this.lobby = new Location(map.getBukkitWorld(), -2.5, 61, -2.5);
         this.play = new Location(map.getBukkitWorld(), -2.5, 53, -8.5);
@@ -148,24 +171,46 @@ public class GameManager {
 
         switch (status) {
             case LOBBY:
-                Bukkit.broadcast(Component.text("En attente de joueurs"));
+                Bukkit.broadcast(Component.text(Message.LOBBY_STATUS.getMessage()));
+
                 new LobbyRunnable(this).runTaskTimer(plugin, 0L, 20L);
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    LobbyBoard.getInstance().createNewScoreboard(player);
+                }
+
                 break;
             case STARTING:
-                Bukkit.broadcast(Component.text("Démarrage"));
                 new StartingRunnable(this).runTaskTimer(plugin, 0L, 20L);
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    StartingBoard.getInstance().createNewScoreboard(player);
+                }
+
                 break;
             case PLAYING:
+                Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
+                Bukkit.broadcast(Component.text(Message.PLAYING_STATUS.getMessage()));
+                Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
+
                 for (GamePlayer player : players) {
                     teleportToWaiting(player.getPlayer());
                 }
+
                 startRound();
-                Bukkit.broadcast(Component.text("C'est partie"));
+
                 new PlayingRunnable(this).runTaskTimer(plugin, 0L, 20L);
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    PlayingBoard.getInstance().createNewScoreboard(player);
+                }
                 break;
             case END:
-                Bukkit.broadcast(Component.text("Fin de la partie"));
                 new EndRunnable(this).runTaskTimer(plugin, 0L, 20L);
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    EndBoard.getInstance().createNewScoreboard(player);
+                }
                 break;
         }
     }
@@ -193,5 +238,21 @@ public class GameManager {
 
     public int getMinPlayers() {
         return minPlayers;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public Player getWinner() {
+        return winner;
+    }
+
+    public int getTimer() {
+        return timer;
+    }
+
+    public void setTimer(int timer) {
+        this.timer = timer;
     }
 }
