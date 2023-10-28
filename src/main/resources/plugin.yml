@@ -1,0 +1,4 @@
+name: DeACoudre
+main: fr.nayz.deacoudre.DeACoudre
+version: 1.0-SNAPSHOT
+api-version: 1.20

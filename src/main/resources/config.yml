@@ -1,0 +1,22 @@
+maps:
+  0:
+    name: Map-1
+    world: map1
+    lobby:
+      x: 0
+      y: 0
+      z: 0
+      yaw: 90
+      pitch: 0
+    room:
+      x: 0
+      y: 0
+      z: 0
+      yaw: 90
+      pitch: 0
+    diving-board:
+      x: 0
+      y: 0
+      z: 0
+      yaw: 90
+      pitch: 0
