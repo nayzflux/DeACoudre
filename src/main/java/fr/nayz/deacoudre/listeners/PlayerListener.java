@@ -1,6 +1,10 @@
 package fr.nayz.deacoudre.listeners;
 
+import fr.nayz.api.GameAPI;
+import fr.nayz.commons.accounts.Account;
+import fr.nayz.deacoudre.DeACoudre;
 import fr.nayz.deacoudre.managers.GameManager;
+import fr.nayz.deacoudre.managers.InventoryManager;
 import fr.nayz.deacoudre.messages.Message;
 import fr.nayz.deacoudre.players.GamePlayer;
 import fr.nayz.deacoudre.scoreboards.EndBoard;
@@ -11,13 +15,13 @@ import fr.nayz.deacoudre.status.GameStatus;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerListener implements Listener {
     private final GameManager gameManager;
@@ -38,18 +42,23 @@ public class PlayerListener implements Listener {
             gameManager.setStatus(GameStatus.STARTING);
         }
 
-        // Scoreboard
+        InventoryManager inventoryManager = DeACoudre.getInstance().getInventoryManager();
+
         switch (gameManager.getStatus()) {
             case LOBBY:
+                inventoryManager.giveLobbyInventory(player);
                 LobbyBoard.getInstance().createNewScoreboard(player);
                 break;
             case STARTING:
+                inventoryManager.giveLobbyInventory(player);
                 StartingBoard.getInstance().createNewScoreboard(player);
                 break;
             case PLAYING:
+                inventoryManager.clearInventory(player);
                 PlayingBoard.getInstance().createNewScoreboard(player);
                 break;
             case END:
+                inventoryManager.giveLobbyInventory(player);
                 EndBoard.getInstance().createNewScoreboard(player);
                 break;
         }
@@ -95,6 +104,22 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+
+        GamePlayer gamePlayer = gameManager.findGamePlayer(player);
+        Account account = GameAPI.getInstance().getAccountManager().getAccount(player);
+        String chatPrefix = account.getRank().getChatPrefix();
+        String chatColor = account.getRank().getChatColor();
+
+        if (gamePlayer.isAlive()) {
+            event.setFormat(chatPrefix + "%2s §8» " + chatColor + "%1s");
+        } else {
+            event.setFormat(chatPrefix + "%2s §7(Mort) §8» " + chatColor + "%1s");
+        }
+    }
+
+    @EventHandler
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
@@ -111,6 +136,25 @@ public class PlayerListener implements Listener {
             gameManager.teleportToWaiting(player);
             gameManager.checkWin();
             gameManager.playNext();
+        }
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItem();
+
+        if (item == null) return;
+
+        switch (item.getType()) {
+            case PLAYER_HEAD:
+                player.playSound(player, Sound.BLOCK_LEVER_CLICK, 1f, 1f);
+                break;
+            case GOLD_INGOT:
+                player.playSound(player, Sound.BLOCK_LEVER_CLICK, 1f, 1f);
+                break;
+            default:
+                break;
         }
     }
 }

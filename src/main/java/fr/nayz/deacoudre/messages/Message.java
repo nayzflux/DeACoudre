@@ -1,5 +1,7 @@
 package fr.nayz.deacoudre.messages;
 
+import fr.nayz.api.GameAPI;
+import fr.nayz.commons.accounts.Account;
 import org.bukkit.entity.Player;
 
 public enum Message {
@@ -30,6 +32,7 @@ public enum Message {
     }
 
     public String getMessage(Player player) {
-        return message.replace("[PLAYER_NAME]", player.getName()).replace("[RANK_PREFIX]", "§c[Admin] ");
+        Account account = GameAPI.getInstance().getAccountManager().getAccount(player);
+        return message.replace("[PLAYER_NAME]", player.getName()).replace("[RANK_PREFIX]", account.getRank().getChatPrefix());
     }
 }

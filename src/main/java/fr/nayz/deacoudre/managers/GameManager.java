@@ -1,5 +1,6 @@
 package fr.nayz.deacoudre.managers;
 
+import fr.nayz.deacoudre.DeACoudre;
 import fr.nayz.deacoudre.maps.GameMap;
 import fr.nayz.deacoudre.messages.Message;
 import fr.nayz.deacoudre.players.GamePlayer;
@@ -119,10 +120,6 @@ public class GameManager {
 
         teleportToPlaying(player);
 
-        ItemStack bucket = new ItemStack(Material.WATER_BUCKET);
-
-        player.getInventory().setItem(0, bucket);
-
         player.showTitle(Title.title(Component.text("§6A vous de jouer !"), Component.text("§cEviter de toucher le sol")));
 
         Bukkit.broadcast(Component.text(Message.PLAYER_PLAYTIME.getMessage(player)));
@@ -169,6 +166,8 @@ public class GameManager {
     public void setStatus(GameStatus status) {
         this.status = status;
 
+        InventoryManager inventoryManager = DeACoudre.getInstance().getInventoryManager();
+
         switch (status) {
             case LOBBY:
                 Bukkit.broadcast(Component.text(Message.LOBBY_STATUS.getMessage()));
@@ -193,6 +192,8 @@ public class GameManager {
                 Bukkit.broadcast(Component.text(Message.PLAYING_STATUS.getMessage()));
                 Bukkit.broadcast(Component.text(Message.SECTION.getMessage()));
 
+                inventoryManager.clearInventory();
+
                 for (GamePlayer player : players) {
                     teleportToWaiting(player.getPlayer());
                 }
@@ -206,6 +207,9 @@ public class GameManager {
                 }
                 break;
             case END:
+                inventoryManager.clearInventory();
+                inventoryManager.giveLobbyInventory();
+
                 new EndRunnable(this).runTaskTimer(plugin, 0L, 20L);
 
                 for (Player player : Bukkit.getOnlinePlayers()) {

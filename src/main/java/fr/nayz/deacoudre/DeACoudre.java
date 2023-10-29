@@ -4,6 +4,7 @@ import fr.nayz.deacoudre.listeners.CancelListener;
 import fr.nayz.deacoudre.listeners.PlayerListener;
 import fr.nayz.deacoudre.managers.ConfigManager;
 import fr.nayz.deacoudre.managers.GameManager;
+import fr.nayz.deacoudre.managers.InventoryManager;
 import fr.nayz.deacoudre.scoreboards.LobbyBoard;
 import fr.nayz.deacoudre.scoreboards.PlayingBoard;
 import fr.nayz.deacoudre.scoreboards.StartingBoard;
@@ -14,25 +15,11 @@ public class DeACoudre extends JavaPlugin {
     private static DeACoudre INSTANCE;
     private GameManager gameManager;
     private ConfigManager configManager;
+    private InventoryManager inventoryManager;
 
     public static DeACoudre getInstance() {
         return INSTANCE;
 
-    }
-
-    @Override
-    public void onEnable() {
-        INSTANCE = this;
-
-        gameManager = new GameManager(this);
-        configManager = new ConfigManager(this);
-
-        registerEvents();
-        registerCommands();
-
-        new LobbyBoard().runTaskTimer(this, 0L, 20L);
-        new StartingBoard().runTaskTimer(this, 0L, 20L);
-        new PlayingBoard().runTaskTimer(this, 0L, 20L);
     }
 
     private void registerEvents() {
@@ -47,5 +34,27 @@ public class DeACoudre extends JavaPlugin {
 
     public GameManager getGameManager() {
         return gameManager;
+    }
+
+    @Override
+    public void onEnable() {
+        INSTANCE = this;
+
+        gameManager = new GameManager(this);
+
+        configManager = new ConfigManager(this);
+
+        inventoryManager = new InventoryManager();
+
+        registerEvents();
+        registerCommands();
+
+        new LobbyBoard().runTaskTimer(this, 0L, 20L);
+        new StartingBoard().runTaskTimer(this, 0L, 20L);
+        new PlayingBoard().runTaskTimer(this, 0L, 20L);
+    }
+
+    public InventoryManager getInventoryManager() {
+        return inventoryManager;
     }
 }
